@@ -1418,7 +1418,7 @@ func ParseAddressValue(addressText string) (
 
 	// Finally, parse any header parameters and then return.
 	addressText = addressText[startOfParams:]
-	headerParams, _, err = ParseParams(addressText, ';', ';', ',', true, true)
+	headerParams, _, err = ParseParams(addressText, ';', ';', ',', false, true)
 	return
 }
 
