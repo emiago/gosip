@@ -1,7 +1,6 @@
 package sip
 
 import (
-	"bytes"
 	"strings"
 	"sync"
 
@@ -139,7 +138,7 @@ func newHeaders(hdrs []Header) *headers {
 }
 
 func (hs *headers) String() string {
-	buffer := bytes.Buffer{}
+	buffer := strings.Builder{}
 	hs.mu.RLock()
 	// Construct each header in turn and add it to the message.
 	for typeIdx, name := range hs.headerOrder {
@@ -438,7 +437,7 @@ func (msg *message) Fields() log.Fields {
 }
 
 func (msg *message) String() string {
-	var buffer bytes.Buffer
+	var buffer strings.Builder
 
 	// write message start line
 	buffer.WriteString(msg.StartLine() + "\r\n")
