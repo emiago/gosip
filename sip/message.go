@@ -156,7 +156,7 @@ func (hs *headers) String() string {
 
 // Add the given header.
 func (hs *headers) AppendHeader(header Header) {
-	name := strings.ToLower(header.Name())
+	name := HeaderToLower(header.Name())
 	hs.mu.Lock()
 	if _, ok := hs.headers[name]; ok {
 		hs.headers[name] = append(hs.headers[name], header)
@@ -171,7 +171,7 @@ func (hs *headers) AppendHeader(header Header) {
 // if there is no header has h's name, add h to the font of all headers
 // if there are some headers have h's name, add h to front of the sublist
 func (hs *headers) PrependHeader(header Header) {
-	name := strings.ToLower(header.Name())
+	name := HeaderToLower(header.Name())
 	hs.mu.Lock()
 	if hdrs, ok := hs.headers[name]; ok {
 		hs.headers[name] = append([]Header{header}, hdrs...)
@@ -185,8 +185,8 @@ func (hs *headers) PrependHeader(header Header) {
 }
 
 func (hs *headers) PrependHeaderAfter(header Header, afterName string) {
-	headerName := strings.ToLower(header.Name())
-	afterName = strings.ToLower(afterName)
+	headerName := HeaderToLower(header.Name())
+	afterName = HeaderToLower(afterName)
 	hs.mu.Lock()
 	if _, ok := hs.headers[afterName]; ok {
 		afterIdx := -1
@@ -231,7 +231,7 @@ func (hs *headers) PrependHeaderAfter(header Header, afterName string) {
 }
 
 func (hs *headers) ReplaceHeaders(name string, headers []Header) {
-	name = strings.ToLower(name)
+	name = HeaderToLower(name)
 	hs.mu.Lock()
 	if _, ok := hs.headers[name]; ok {
 		hs.headers[name] = headers
@@ -252,7 +252,7 @@ func (hs *headers) Headers() []Header {
 }
 
 func (hs *headers) GetHeaders(name string) []Header {
-	name = strings.ToLower(name)
+	name = HeaderToLower(name)
 	hs.mu.RLock()
 	defer hs.mu.RUnlock()
 	if hs.headers == nil {
@@ -267,7 +267,7 @@ func (hs *headers) GetHeaders(name string) []Header {
 }
 
 func (hs *headers) RemoveHeader(name string) {
-	name = strings.ToLower(name)
+	name = HeaderToLower(name)
 	hs.mu.Lock()
 	delete(hs.headers, name)
 	// update order slice
@@ -525,17 +525,35 @@ func (msg *message) SetDestination(dest string) {
 // Copy all headers of one type from one message to another.
 // Appending to any headers that were already there.
 func CopyHeaders(name string, from, to Message) {
-	name = strings.ToLower(name)
+	name = HeaderToLower(name)
 	for _, h := range from.GetHeaders(name) {
 		to.AppendHeader(h.Clone())
 	}
 }
 
 func PrependCopyHeaders(name string, from, to Message) {
-	name = strings.ToLower(name)
+	name = HeaderToLower(name)
 	for _, h := range from.GetHeaders(name) {
 		to.PrependHeader(h.Clone())
 	}
 }
 
 type MessageMapper func(msg Message) Message
+
+func HeaderToLower(s string) string {
+	return ASCIIToLower(s)
+}
+
+// ASCIIToLower is faster than go version. It avoids one more loop
+func ASCIIToLower(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if 'A' <= c && c <= 'Z' {
+			c += 'a' - 'A'
+		}
+		b.WriteByte(c)
+	}
+	return b.String()
+}
