@@ -595,12 +595,17 @@ func (to *ToHeader) String() string {
 func (to *ToHeader) Name() string { return "To" }
 
 func (to *ToHeader) Value() string {
-	var buffer bytes.Buffer
+	var buffer strings.Builder
 	if displayName, ok := to.DisplayName.(String); ok && displayName.String() != "" {
-		buffer.WriteString(fmt.Sprintf("\"%s\" ", displayName))
+		buffer.WriteString("\"")
+		buffer.WriteString(displayName.String())
+		buffer.WriteString("\"")
 	}
 
-	buffer.WriteString(fmt.Sprintf("<%s>", to.Address))
+	// buffer.WriteString(fmt.Sprintf("<%s>", to.Address))
+	buffer.WriteString("<")
+	buffer.WriteString(to.Address.String())
+	buffer.WriteString(">")
 
 	if to.Params != nil && to.Params.Length() > 0 {
 		buffer.WriteString(";")
@@ -687,12 +692,16 @@ func (from *FromHeader) String() string {
 func (from *FromHeader) Name() string { return "From" }
 
 func (from *FromHeader) Value() string {
-	var buffer bytes.Buffer
+	var buffer strings.Builder
 	if displayName, ok := from.DisplayName.(String); ok && displayName.String() != "" {
-		buffer.WriteString(fmt.Sprintf("\"%s\" ", displayName))
+		buffer.WriteString("\"")
+		buffer.WriteString(displayName.String())
+		buffer.WriteString("\"")
 	}
 
-	buffer.WriteString(fmt.Sprintf("<%s>", from.Address))
+	buffer.WriteString("<")
+	buffer.WriteString(from.Address.String())
+	buffer.WriteString(">")
 
 	if from.Params != nil && from.Params.Length() > 0 {
 		buffer.WriteString(";")
